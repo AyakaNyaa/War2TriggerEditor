@@ -1,32 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../shared/api';
 import { CommandFields } from '../shared/CommandFields';
-import { commandDescription, conditionText, sorted, type Translate } from '../shared/presentation';
+import { commandDescription, conditionText, type Translate } from '../shared/presentation';
 import type { CommandDraftRequest, CommandSpec, Instruction, RuleCondition } from '../shared/generated';
 import { ConditionFields, initialCondition } from './ConditionFields';
+import { Catalog } from './Catalog';
 
 export type BuilderSelection = { key: number; mode: 'rule' | 'command'; index: number; replaceEnd?: number;
   instruction?: Instruction; condition?: RuleCondition; actions?: Instruction[]; opcode?: number };
 export type BuilderValue = { selection: BuilderSelection; condition: RuleCondition; actions: CommandDraftRequest[] };
-type Props = { selection?: BuilderSelection; catalog: CommandSpec[]; locale: string; t: Translate; busy: boolean;
-  onSubmit: (value: BuilderValue, preview: boolean) => void; onDraft: (dirty: boolean) => void; onError: (code: string) => void; onClose: () => void };
 
+type Props = { selection?: BuilderSelection; catalog: CommandSpec[]; locale: string; t: Translate; busy: boolean;
+  onSubmit: (value: BuilderValue, preview: boolean) => void; onDraft: (dirty: boolean) => void; onError: (code: string) => void;
+  onClose: () => void; onNewRule: () => void; onCatalog: () => void };
 const toDraft = (instruction: Instruction): CommandDraftRequest => ({ opcode: instruction.opcode,
   values: instruction.fields.map((field) => field.value), text: instruction.text });
 const signature = (condition: RuleCondition, actions: Instruction[]) => JSON.stringify({ condition, actions: actions.map(toDraft) });
 
-export function Builder({ selection, catalog, locale, t, busy, onSubmit, onDraft, onError, onClose }: Props) {
+export function Builder({ selection, catalog, locale, t, busy, onSubmit, onDraft, onError, onClose, onNewRule, onCatalog }: Props) {
   const [condition, setCondition] = useState(initialCondition);
   const [actions, setActions] = useState<Instruction[]>([]);
-  const [actionOpcode, setActionOpcode] = useState(24);
+  const [picker, setPicker] = useState<number>();
+  const [focusAction, setFocusAction] = useState<number>();
   const [loading, setLoading] = useState(false);
   const [initial, setInitial] = useState('');
   const generation = useRef(0);
+  const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const current = ++generation.current;
+    setPicker(undefined); setFocusAction(undefined); setInitial('');
     if (!selection) { setActions([]); onDraft(false); return; }
     const nextCondition = selection.condition ?? initialCondition();
-    setCondition(nextCondition); setLoading(true);
+    setCondition(nextCondition); setActions([]); setLoading(true);
     const load = selection.actions ? Promise.resolve(selection.actions) : selection.instruction ? Promise.resolve([selection.instruction])
       : api.draft({ opcode: selection.opcode ?? 24 }).then((instruction) => [instruction]);
     load.then((next) => { if (generation.current === current) { setActions(next); setInitial(signature(nextCondition, next)); } })
@@ -35,14 +40,22 @@ export function Builder({ selection, catalog, locale, t, busy, onSubmit, onDraft
   }, [selection?.key]);
   const dirty = Boolean(selection && initial && signature(condition, actions) !== initial);
   useEffect(() => { onDraft(dirty); }, [dirty, onDraft]);
-  if (!selection) return <aside className="builder-pane builder-welcome">
-    <span className="builder-emblem" aria-hidden="true">◇</span><h2>{t('builder.emptyTitle')}</h2><p>{t('builder.emptyBody')}</p>
-    <div className="legend"><span className="type-label condition-label">{t('when')}</span><span>→</span><span className="type-label action-label">{t('then')}</span></div>
-  </aside>;
+  useEffect(() => {
+    if (focusAction == null || loading) return;
+    const action = scroll.current?.querySelector<HTMLElement>(`[data-action-index="${focusAction}"]`);
+    if (action) { action.scrollIntoView({ block: 'start' }); (action.querySelector<HTMLElement>('input, select, textarea') ?? action).focus({ preventScroll: true }); }
+    setFocusAction(undefined);
+  }, [focusAction, loading]);
+  if (!selection) return <section className="builder-pane builder-welcome">
+    <div className="builder-start"><span className="start-icon" aria-hidden="true">◇</span><h2>{t('workbench.startTitle')}</h2><p>{t('workbench.startBody')}</p>
+      <div className="welcome-actions"><button className="gold" disabled={busy} onClick={onNewRule}>＋ {t('rule.new')}</button><button disabled={busy} onClick={onCatalog}>{t('workbench.catalog')}</button></div>
+      <div className="start-example"><span className="type-label condition-label">{t('when')}</span><p>{t('workbench.exampleWhen')}</p><span aria-hidden="true">→</span><span className="type-label action-label">{t('then')}</span><p>{t('command.24')}</p></div>
+    </div>
+  </section>;
   const isRule = selection.mode === 'rule';
   const existing = selection.replaceEnd != null || selection.instruction != null;
   const isSetting = !isRule && catalog.find((s) => s.opcode === actions[0]?.opcode)?.kind === 'setting';
-  const options = sorted(catalog.filter((s) => s.kind !== 'condition' && s.kind !== 'structure' && s.stage !== 'preload'), (s) => t(s.name_key), locale);
+  const title = isRule ? t('builder.ruleTitle') : actions[0] ? t(`command.${actions[0].opcode}`) : t('builder.commandTitle');
   const submit = (preview: boolean) => onSubmit({ selection, condition, actions: actions.map(toDraft) }, preview);
   const changeAction = (index: number, values: number[], text: string) => {
     const original = actions[index];
@@ -55,42 +68,47 @@ export function Builder({ selection, catalog, locale, t, busy, onSubmit, onDraft
     } else setActions((old) => old.map((item, i) => i === index ? { ...item,
       fields: item.fields.map((field, n) => ({ ...field, value: values[n] })), text: item.text == null ? null : text } : item));
   };
-  return <aside className="builder-pane">
-    <header className="builder-heading"><div><span className="eyebrow">{t(existing ? 'builder.edit' : 'builder.new')}</span><h2>{t(isRule ? 'builder.ruleTitle' : isSetting ? 'builder.settingTitle' : 'builder.commandTitle')}</h2></div>
-      <button className="icon-button" aria-label={t('close')} onClick={onClose}>×</button></header>
+  const pickAction = (spec: CommandSpec) => {
+    const index = picker!; setPicker(undefined); setLoading(true); const current = generation.current;
+    api.draft({ opcode: spec.opcode }).then((next) => { if (generation.current === current) { setActions((old) => index < old.length ? old.map((item, i) => i === index ? next : item) : [...old, next]); setFocusAction(index); } })
+      .catch((error) => onError(error.message)).finally(() => { if (generation.current === current) setLoading(false); });
+  };
+  const moveAction = (index: number, direction: number) => setActions((old) => {
+    const next = [...old]; [next[index], next[index + direction]] = [next[index + direction], next[index]]; return next;
+  });
+  return <section className="builder-pane">
+    <header className="builder-heading"><div><span className="eyebrow">{t(existing ? 'builder.edit' : 'builder.new')}</span><h2>{title}</h2></div>
+      <button className="quiet" onClick={onClose}>{t('workbench.closeEditor')} ×</button></header>
     <form className="builder-form" onSubmit={(event) => { event.preventDefault(); submit(false); }}>
-      <fieldset disabled={busy || loading}>
-        {isRule && <ConditionFields value={condition} change={setCondition} locale={locale} t={t} />}
-        <section className="actions-section"><div className="section-heading"><span className={`type-label ${isRule ? 'action-label' : 'setting-label'}`}>{t(isRule ? 'then' : 'setting')}</span><h3>{t(isRule ? 'rule.actions' : 'builder.parameters')}</h3></div>
-          {actions.map((instruction, index) => {
-            const spec = catalog.find((s) => s.opcode === instruction.opcode);
-            return <article className="action-editor" key={`${index}-${instruction.opcode}`}>
-              <header><h4>{t(`command.${instruction.opcode}`)}</h4>{isRule && actions.length > 1 && <button type="button" className="icon-button" aria-label={`${t('action.remove')} ${index + 1}`} onClick={() => setActions(actions.filter((_, i) => i !== index))}>×</button>}</header>
-              {isRule && <div className="field"><label htmlFor={`action-kind-${index}`}>{t('action.type')} {index + 1}</label><select id={`action-kind-${index}`} value={instruction.opcode} onChange={(event) => {
-                setLoading(true); const current = generation.current;
-                api.draft({ opcode: Number(event.target.value) }).then((next) => { if (generation.current === current) setActions((old) => old.map((item, i) => i === index ? next : item)); })
-                  .catch((error) => onError(error.message)).finally(() => { if (generation.current === current) setLoading(false); });
-              }}>{options.map((option) => <option key={option.opcode} value={option.opcode}>{t(option.name_key)}</option>)}</select></div>}
-              {spec && <p className="action-description">{commandDescription(spec, t)}</p>}
-              <CommandFields instruction={instruction} values={instruction.fields.map((f) => f.value)} text={instruction.text ?? ''}
-                prefix={`builder-${index}`} locale={locale} t={t} onChange={(values, text) => changeAction(index, values, text)} />
-              {spec?.stage === 'preload' && <p className="field-hint">{t('builder.preload')}</p>}
-            </article>;
-          })}
-          {isRule && <div className="add-action"><label htmlFor="builder-action-kind">{t('action.choose')}</label>
-            <div><select id="builder-action-kind" value={actionOpcode} onChange={(e) => setActionOpcode(Number(e.target.value))}>
-              {options.map((spec) => <option key={spec.opcode} value={spec.opcode}>{t(spec.name_key)}</option>)}</select>
-              <button type="button" className="icon-button" aria-label={t('action.add')} onClick={() => {
-                setLoading(true); const current = generation.current;
-                api.draft({ opcode: actionOpcode }).then((next) => { if (generation.current === current) setActions((old) => [...old, next]); })
-                  .catch((error) => onError(error.message)).finally(() => { if (generation.current === current) setLoading(false); });
-              }}>＋</button></div></div>}
-        </section>
-        {isRule && <div className="rule-summary"><span>{t('rule.summary')}</span><p><b>{t('when')}</b> {conditionText(condition, t, locale)}</p>
-          <p><b>{t('then')}</b> {actions.map((action) => t(`command.${action.opcode}`)).join(' → ')}</p></div>}
-        <div className="builder-submit"><button className="gold full" type="submit" disabled={!actions.length}>{loading || busy ? t('pending') : t(existing ? 'builder.apply' : isRule ? 'builder.addRule' : isSetting ? 'builder.addSetting' : 'builder.addCommand')} <span aria-hidden="true">→</span></button>
-          <button className="quiet full" type="button" onClick={() => submit(true)} disabled={!actions.length}>{t('builder.preview')}</button><small>{t('builder.fileNote')}</small></div>
-      </fieldset>
+      <div className="builder-scroll" ref={scroll} key={selection.key}><fieldset disabled={busy || loading}>
+        <div className={`builder-grid ${isRule ? '' : 'command-only'}`}>
+          {isRule && <ConditionFields value={condition} change={setCondition} locale={locale} t={t} />}
+          <section className="actions-section"><div className="section-heading"><span className={`type-label ${isRule ? 'action-label' : 'setting-label'}`}>{t(isRule ? 'then' : 'setting')}</span><h3>{t(isRule ? 'rule.actions' : 'builder.parameters')}</h3>
+            {isRule && <button className="quiet add-action-top" type="button" onClick={() => setPicker(actions.length)}>＋ {t('action.add')}</button>}</div>
+            {actions.map((instruction, index) => {
+              const spec = catalog.find((s) => s.opcode === instruction.opcode);
+              return <article className="action-editor" data-action-index={index} tabIndex={-1} key={`${index}-${instruction.opcode}`}>
+                <header><span className="action-number">{index + 1}</span><h4>{t(`command.${instruction.opcode}`)}</h4>{isRule && <div className="action-tools">
+                  <button type="button" className="quiet" aria-label={`${t('workbench.changeAction')} ${index + 1}`} onClick={() => setPicker(index)}>{t('workbench.change')}</button>
+                  {actions.length > 1 && <><button type="button" className="icon-button" disabled={index === 0} aria-label={`${t('workbench.actionUp')} ${index + 1}`} onClick={() => moveAction(index, -1)}>↑</button>
+                    <button type="button" className="icon-button" disabled={index === actions.length - 1} aria-label={`${t('workbench.actionDown')} ${index + 1}`} onClick={() => moveAction(index, 1)}>↓</button></>}
+                  {actions.length > 1 && <button type="button" className="icon-button danger" aria-label={`${t('action.remove')} ${index + 1}`} onClick={() => setActions(actions.filter((_, i) => i !== index))}>×</button>}</div>}</header>
+                {spec && <p className="action-description">{commandDescription(spec, t)}</p>}
+                <CommandFields instruction={instruction} values={instruction.fields.map((f) => f.value)} text={instruction.text ?? ''}
+                  prefix={`builder-${index}`} locale={locale} t={t} onChange={(values, text) => changeAction(index, values, text)} />
+                {spec?.stage === 'preload' && <p className="field-hint">{t('builder.preload')}</p>}
+              </article>;
+            })}
+            {isRule && <button type="button" className="add-action" onClick={() => setPicker(actions.length)}>＋ {t('action.add')}</button>}
+          </section>
+        </div>
+      </fieldset></div>
+      <div className="builder-submit"><div className="rule-summary"><strong>{t(isRule ? 'rule.summary' : 'builder.parameters')}</strong>
+        <p>{isRule ? <>{conditionText(condition, t, locale)} <span className="summary-arrow">→</span> {actions.map((action) => t(`command.${action.opcode}`)).join(' → ')}</> : t('builder.fileNote')}</p></div>
+        <div className="submit-actions"><button className="quiet" type="button" disabled={busy || loading || !actions.length} onClick={(event) => { if (event.currentTarget.form?.reportValidity()) submit(true); }}>{t('builder.preview')}</button>
+          <button className="gold" type="submit" disabled={busy || loading || !actions.length}>{loading || busy ? t('pending') : t(existing ? 'builder.apply' : isRule ? 'builder.addRule' : isSetting ? 'builder.addSetting' : 'builder.addCommand')}</button></div>
+      </div>
     </form>
-  </aside>;
+    {picker != null && <Catalog catalog={catalog} actionsOnly locale={locale} t={t} disabled={busy || loading} onChoose={pickAction} onClose={() => setPicker(undefined)} />}
+  </section>;
 }

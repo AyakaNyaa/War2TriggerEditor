@@ -31,6 +31,5 @@ export function CommandFields({ instruction, values, text, disabled, t, locale, 
       <textarea id={`${prefix}-text`} rows={5} value={text} onChange={(event) => onChange(values, event.target.value)} placeholder={t('text.placeholder')} />
       <small>{t('text.encoding')}</small>
     </div>}
-    {!instruction.fields.length && instruction.text == null && <p className="field-hint">{t('field.noParameters')}</p>}
   </fieldset>;
 }

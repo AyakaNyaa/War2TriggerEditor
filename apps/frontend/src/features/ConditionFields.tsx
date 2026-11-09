@@ -29,7 +29,7 @@ export function ConditionFields({ value, change, locale, t }: Props) {
     </>}
     {value.kind === 'flag' && <div className="advanced-notice"><p>{t('flag.help')}</p><div className="field"><label htmlFor="condition-flag">{t('flag')}</label><input id="condition-flag" type="number" required min={0} max={255} value={value.flag} onChange={(e) => update({ flag: e.target.valueAsNumber })} /></div>
       <div className="field"><label htmlFor="condition-flag-value">{t('flag.expected')}</label><select id="condition-flag-value" value={Number(value.flag_value)} onChange={(e) => update({ flag_value: Boolean(Number(e.target.value)) })}><option value={1}>{t('flag.on')}</option><option value={0}>{t('flag.off')}</option></select></div>
-      <div className="switch-guide"><strong>{t('flag.exampleTitle')}</strong><p>① {t('flag.exampleSet')}</p><p>② {t('flag.exampleCheck')}</p><small>{t('flag.sameNumber')}</small></div></div>}
+      <details className="switch-guide"><summary>{t('flag.exampleTitle')}</summary><p>① {t('flag.exampleSet')}</p><p>② {t('flag.exampleCheck')}</p><small>{t('flag.sameNumber')}</small></details></div>}
     {value.kind === 'always' && <p className="field-hint">{t('condition.alwaysHint')}</p>}
     {value.kind !== 'flag' && value.kind !== 'always' && <p className="automatic-note">{t('rule.automatic')}</p>}
   </section>;

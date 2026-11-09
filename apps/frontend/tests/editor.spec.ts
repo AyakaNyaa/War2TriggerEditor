@@ -9,7 +9,7 @@ test('open, edit, preview, apply, undo and change language through the real API'
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByText('Условие. Действие. Ваша история.')).toBeVisible();
+  await expect(page.getByText('Создайте логику вашей миссии')).toBeVisible();
   await page.screenshot({ path: '../../.local/welcome.png', fullPage: true });
   await page.getByLabel('Language / Язык').selectOption('en');
   await page.getByLabel('Import file', { exact: true }).setInputFiles(source);
@@ -19,7 +19,7 @@ test('open, edit, preview, apply, undo and change language through the real API'
   const fields = page.locator('.builder-pane input[type=number]');
   await expect(fields).toHaveCount(2);
   await fields.nth(1).fill('2');
-  await page.locator('.builder-pane').getByRole('button', { name: 'Preview changes' }).click();
+  await page.locator('.builder-pane').getByRole('button', { name: 'Preview', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog').getByText('Value: 2', { exact: false })).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: 'Apply changes' }).click();
@@ -31,7 +31,7 @@ test('open, edit, preview, apply, undo and change language through the real API'
   await expect(fields.nth(1)).toHaveValue('2');
   await page.screenshot({ path: '../../.local/editor.png', fullPage: true });
   await page.getByLabel('Language / Язык').selectOption('ru');
-  await expect(page.getByRole('heading', { name: 'Команда сценария' })).toBeVisible();
+  await expect(page.locator('.builder-heading').getByRole('heading', { name: 'Установить значение' })).toBeVisible();
   await page.setViewportSize({ width: 1000, height: 800 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(errors).toEqual([]);

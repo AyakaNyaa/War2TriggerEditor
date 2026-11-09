@@ -15,14 +15,15 @@ def main():
         shutil.copy2(ROOT / "target/debug" / source, destination / target)
     shutil.copy2(ROOT / "docs/USER_GUIDE.md", destination / "USER_GUIDE.md")
     shutil.copy2(ROOT / "docs/RUN_RU.md", destination / "RUN_RU.md")
-    text = """War2 Trigger Editor — тестовая сборка 0.2.0
+    text = """War2 Trigger Editor — тестовая сборка 0.3.0
 
 Запуск: War2TriggerEditor.exe. Требуются Windows и WebView2 Runtime.
 Интерфейс и локальный API встроены; Node.js для запуска не нужен.
 Данные не отправляются во внешние сервисы.
 
 Откройте PUD/W2TR или создайте новый сценарий. Выберите элемент каталога,
-настройте условие и действия справа, добавьте готовый триггер и сохраните.
+открыв «Каталог команд». Условие и действия настраиваются в широкой форме
+справа; добавьте готовый триггер и сохраните.
 Перед записью автоматически создаётся бэкап. Поиск находится сверху.
 Подробности — в USER_GUIDE.md.
 
