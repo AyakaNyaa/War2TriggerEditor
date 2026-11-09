@@ -47,4 +47,4 @@
 но поведение сохранённых сценариев ещё нужно проверить в целевой сборке
 War2Combat/War2Mod. AI, ручной язык и полный редактор ландшафта сюда не входят.
 
-Разработчикам: [сборка из исходников](DEVELOPMENT.md).
+Разработчикам: [сборка из исходников](https://github.com/AyakaNyaa/War2TriggerEditor/blob/main/docs/DEVELOPMENT.md).
