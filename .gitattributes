@@ -6,3 +6,4 @@
 *.zip -text
 legacy-audit/source/tr/ex/read.txt -text whitespace=cr-at-eol
 legacy-audit/evidence/*.gml whitespace=-blank-at-eol
+legacy-audit/semantics/*.gml whitespace=-blank-at-eol

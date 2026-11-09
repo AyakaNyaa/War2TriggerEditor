@@ -1,0 +1,24 @@
+var_mmsize = 3
+
+mmi[00] = lstr(162)
+sms[00] = 1
+  smi[00,00] = ds_list_find_value(drawer2.lu,57)
+mmi[01] = lstr(163)
+sms[01] = 7
+  smi[01,00] = ds_list_find_value(drawer2.lu,20)
+  smi[01,01] = ds_list_find_value(drawer2.lu,22)
+  smi[01,02] = ds_list_find_value(drawer2.lu,24)
+  smi[01,03] = ds_list_find_value(drawer2.lu,44)
+  smi[01,04] = ds_list_find_value(drawer2.lu,46)
+  smi[01,05] = ds_list_find_value(drawer2.lu,50)
+  smi[01,06] = ds_list_find_value(drawer2.lu,52)
+mmi[02] = lstr(164)
+sms[02] = 8
+  smi[02,00] = ds_list_find_value(drawer2.lu,21)
+  smi[02,01] = ds_list_find_value(drawer2.lu,23)
+  smi[02,02] = ds_list_find_value(drawer2.lu,25)
+  smi[02,03] = ds_list_find_value(drawer2.lu,47)
+  smi[02,04] = ds_list_find_value(drawer2.lu,35)
+  smi[02,05] = ds_list_find_value(drawer2.lu,49)
+  smi[02,06] = ds_list_find_value(drawer2.lu,51)
+  smi[02,07] = ds_list_find_value(drawer2.lu,53)

@@ -1,4 +1,4 @@
-"""Inspect the exact staged Git snapshot before its first public upload.
+"""Inspect the exact staged Git snapshot before a public upload.
 
 Report file names and rule names only, never matching credential contents.
 """
@@ -20,7 +20,7 @@ def git(*arguments):
 
 
 def main():
-    files = [name for name in git("diff", "--cached", "--name-only", "-z").decode().split("\0") if name]
+    files = [name for name in git("diff", "--cached", "--name-only", "--diff-filter=ACMRT", "-z").decode().split("\0") if name]
     # Read the staged blobs in one Git process rather than one process per file.
     batch = subprocess.check_output(["git", "cat-file", "--batch"], cwd=ROOT,
         input="".join(f":{name}\n" for name in files).encode())

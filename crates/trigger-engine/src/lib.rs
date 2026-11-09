@@ -1,5 +1,9 @@
 //! Trigger bytecode API. Independent of file containers, storage and UI.
+mod catalog;
 mod fields;
+mod legacy_forms;
+mod outline;
+mod rules;
 mod units;
 mod validation;
 use contracts::{CommandSpec, Fault, Instruction, Program, Result, TriggerApi};
@@ -11,10 +15,10 @@ pub struct TriggerEngine {
 impl Default for TriggerEngine {
     fn default() -> Self {
         Self {
-            catalog: serde_json::from_str(include_str!(
-                "../../../schemas/commands/legacy-1.6.1.json"
-            ))
-            .expect("embedded catalog"),
+            catalog: catalog::enrich(
+                serde_json::from_str(include_str!("../../../schemas/commands/legacy-1.6.1.json"))
+                    .expect("embedded catalog"),
+            ),
         }
     }
 }
@@ -70,6 +74,7 @@ impl TriggerApi for TriggerEngine {
             length: None,
             terminator: None,
             diagnostics: Vec::new(),
+            blocks: Vec::new(),
         };
         let mut offset = 0;
         while offset < bytes.len() {
@@ -89,6 +94,7 @@ impl TriggerApi for TriggerEngine {
             if command[0] == 254 {
                 result.length = Some(offset + length);
                 result.terminator = Some(command[1]);
+                result.blocks = outline::blocks(&result.instructions);
                 result
                     .diagnostics
                     .extend(validation::check(&result.instructions));
@@ -172,7 +178,55 @@ impl TriggerApi for TriggerEngine {
         }
         fields::edit(instruction, values, text)
     }
+
+    fn draft(&self, request: &contracts::CommandDraftRequest) -> Result<Instruction> {
+        let mut bytes = self.create(request.opcode)?;
+        if request.opcode == 6 {
+            if let Some(sub) = request.values.as_ref().and_then(|values| values.first()) {
+                let sub = u8::try_from(*sub).map_err(|_| Fault::new("trigger.argument_range"))?;
+                bytes = vec![0; self.length(&[6, sub], 0)?];
+                bytes[0] = 6;
+                bytes[1] = sub;
+            }
+        }
+        let (fields, text) = fields::describe(&bytes);
+        let original = Instruction {
+            offset: 0,
+            opcode: request.opcode,
+            bytes,
+            fields,
+            text,
+        };
+        let values = request
+            .values
+            .clone()
+            .filter(|v| request.opcode != 6 || v.len() == original.fields.len())
+            .unwrap_or_else(|| original.fields.iter().map(|f| f.value).collect());
+        let bytes = self.edit(&original, &values, request.text.as_deref())?;
+        if self.length(&bytes, 0)? != bytes.len() {
+            return Err(Fault::new("trigger.invalid_command_length"));
+        }
+        let (fields, text) = fields::describe(&bytes);
+        Ok(Instruction {
+            offset: 0,
+            opcode: request.opcode,
+            bytes,
+            fields,
+            text,
+        })
+    }
+
+    fn compile_rule(
+        &self,
+        condition: &contracts::RuleCondition,
+        actions: &[contracts::CommandDraftRequest],
+        existing: &[Vec<u8>],
+    ) -> Result<contracts::CompiledRule> {
+        rules::compile(self, condition, actions, existing)
+    }
 }
 
+#[cfg(test)]
+mod rule_tests;
 #[cfg(test)]
 mod tests;

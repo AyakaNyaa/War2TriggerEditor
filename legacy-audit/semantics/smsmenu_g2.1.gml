@@ -1,0 +1,20 @@
+var_mmsize = 2
+
+mmi[00] = lstr(166)
+sms[00] = 7
+  smi[00,00] = ds_list_find_value(drawer2.lg,34)//hp
+  smi[00,01] = ds_list_find_value(drawer2.lg,38)//mana
+  smi[00,02] = ds_list_find_value(drawer2.lg,42)//mov
+  smi[00,03] = ds_list_find_value(drawer2.lg,43)//sprite
+  smi[00,04] = ds_list_find_value(drawer2.lg,45)//color
+  smi[00,05] = ds_list_find_value(drawer2.lg,37)//commands
+  smi[00,06] = ds_list_find_value(drawer2.lg,130)//resources
+mmi[01] = lstr(167)
+sms[01] = 7
+  smi[01,00] = ds_list_find_value(drawer2.lg,68)//inviz
+  smi[01,01] = ds_list_find_value(drawer2.lg,70)//shield
+  smi[01,02] = ds_list_find_value(drawer2.lg,72)//blood
+  smi[01,03] = ds_list_find_value(drawer2.lg,74)//hast
+  smi[01,04] = ds_list_find_value(drawer2.lg,120)//kills
+  smi[01,05] = ds_list_find_value(drawer2.lg,88)//ai dest x
+  smi[01,06] = ds_list_find_value(drawer2.lg,90)//ai dest y

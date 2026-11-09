@@ -1,11 +1,13 @@
 //! Shared API contracts. No file access, orchestration or implementation logic.
 pub const API_VERSION: &str = "v1";
+mod builder;
 mod documents;
 mod error;
 mod formats;
 mod storage;
 mod triggers;
 
+pub use builder::*;
 pub use documents::*;
 pub use error::*;
 pub use formats::*;

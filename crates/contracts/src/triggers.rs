@@ -8,6 +8,12 @@ pub struct CommandSpec {
     pub length: Option<usize>,
     pub name_key: String,
     pub source: String,
+    #[serde(default)]
+    pub group: String,
+    #[serde(default)]
+    pub kind: String,
+    #[serde(default)]
+    pub stage: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, ToSchema)]
@@ -40,6 +46,7 @@ pub struct Program {
     pub length: Option<usize>,
     pub terminator: Option<u8>,
     pub diagnostics: Vec<Fault>,
+    pub blocks: Vec<crate::ScenarioBlock>,
 }
 
 pub trait TriggerApi: Send + Sync {
@@ -47,6 +54,13 @@ pub trait TriggerApi: Send + Sync {
     fn decode(&self, bytes: &[u8]) -> Program;
     fn assemble(&self, commands: &[Vec<u8>], terminator: u8) -> Result<Vec<u8>>;
     fn create(&self, opcode: u8) -> Result<Vec<u8>>;
+    fn draft(&self, request: &crate::CommandDraftRequest) -> Result<Instruction>;
+    fn compile_rule(
+        &self,
+        condition: &crate::RuleCondition,
+        actions: &[crate::CommandDraftRequest],
+        existing: &[Vec<u8>],
+    ) -> Result<crate::CompiledRule>;
     fn edit(
         &self,
         instruction: &Instruction,

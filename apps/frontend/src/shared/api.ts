@@ -1,4 +1,5 @@
 import type { BackupEntry, RestoreResult, ChangePreview, CommandEditRequest, CommandSpec, DocumentView, RecoveryEntry, SaveReceipt } from './generated';
+import type { CommandDraftRequest, Instruction, RuleRequest, BlockRequest } from './generated';
 
 const token = document.querySelector<HTMLMetaElement>('meta[name="war2-session"]')?.content ?? '';
 
@@ -17,6 +18,9 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 
 export const api = {
   catalog: () => request<CommandSpec[]>('/catalog'),
+  draft: (draft: CommandDraftRequest) => request<Instruction>('/commands/draft', draft),
+  rulePreview: (id: string, rule: RuleRequest) => request<ChangePreview>(`/documents/${id}/rules/preview`, rule),
+  blockPreview: (id: string, edit: BlockRequest) => request<ChangePreview>(`/documents/${id}/blocks/preview`, edit),
   recoveries: () => request<RecoveryEntry[]>('/recoveries'),
   recover: (id: string) => request<DocumentView>(`/recoveries/${id}/open`, {}),
   open: () => request<DocumentView>('/documents/open', {}),

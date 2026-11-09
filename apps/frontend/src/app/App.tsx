@@ -1,146 +1,144 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../shared/api';
 import { translator, type Locale } from '../shared/i18n';
-import type { BackupEntry, ChangePreview, CommandEditRequest, CommandSpec, DocumentView, RecoveryEntry } from '../shared/generated';
-import { Inspector } from '../features/Inspector';
+import { blockMatches } from '../shared/presentation';
+import type { BackupEntry, ChangePreview, CommandSpec, DocumentView, RecoveryEntry, ScenarioBlock } from '../shared/generated';
+import { Catalog } from '../features/Catalog';
+import { Builder, type BuilderSelection, type BuilderValue } from '../features/Builder';
+import { Scenario } from '../features/Scenario';
 import { Preview } from '../features/Preview';
+import { initialCondition } from '../features/ConditionFields';
+import { FileDialogs } from './FileDialogs';
 
 export function App() {
   const [locale, setLocale] = useState<Locale>(localStorage.getItem('war2.locale') === 'en' ? 'en' : 'ru');
   const [doc, setDoc] = useState<DocumentView>();
   const [catalog, setCatalog] = useState<CommandSpec[]>([]);
-  const [selected, setSelected] = useState(0);
   const [query, setQuery] = useState('');
-  const [opcode, setOpcode] = useState(5);
+  const [group, setGroup] = useState('all');
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-  const [preview, setPreview] = useState<ChangePreview>();
+  const [selection, setSelection] = useState<BuilderSelection>();
+  const [preview, setPreview] = useState<{ value: ChangePreview; index: number }>();
   const [help, setHelp] = useState(false);
   const [recoveries, setRecoveries] = useState<RecoveryEntry[]>([]);
   const [showRecovery, setShowRecovery] = useState(false);
   const [backups, setBackups] = useState<BackupEntry[]>();
-  const [width, setWidth] = useState(Number(localStorage.getItem('war2.inspectorWidth')) || 330);
+  const [width, setWidth] = useState(Math.max(380, Number(localStorage.getItem('war2.inspectorWidth')) || 420));
+  const counter = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  const search = useRef<HTMLInputElement>(null);
   const t = translator(locale);
-  const instructions = doc?.program.instructions ?? [];
   const diagnostics = [...(doc?.diagnostics ?? []), ...(doc?.program.diagnostics ?? [])];
-
-  useEffect(() => { api.catalog().then(setCatalog).catch(() => setError('api.unavailable')); }, []);
-  useEffect(() => { api.recoveries().then(setRecoveries).catch(() => setError('api.unavailable')); }, []);
-  useEffect(() => { document.documentElement.lang = locale; localStorage.setItem('war2.locale', locale); }, [locale]);
+  useEffect(() => { api.catalog().then(setCatalog).catch(() => setError('api.unavailable')); api.recoveries().then(setRecoveries).catch(() => {}); }, []);
+  useEffect(() => { document.documentElement.lang = locale; localStorage.setItem('war2.locale', locale); setNotice(''); }, [locale]);
   useEffect(() => { localStorage.setItem('war2.inspectorWidth', String(width)); }, [width]);
   useEffect(() => {
     const unload = (event: BeforeUnloadEvent) => { if (doc?.dirty || draft) { event.preventDefault(); event.returnValue = ''; } };
-    window.addEventListener('beforeunload', unload);
-    return () => window.removeEventListener('beforeunload', unload);
+    window.addEventListener('beforeunload', unload); return () => window.removeEventListener('beforeunload', unload);
   }, [doc?.dirty, draft]);
-
+  useEffect(() => {
+    const keys = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); search.current?.focus(); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); save(false); }
+    };
+    window.addEventListener('keydown', keys); return () => window.removeEventListener('keydown', keys);
+  });
   async function work(action: () => Promise<void>) {
-    if (busy) return;
-    setBusy(true); setError(''); setNotice('');
+    if (busy) return; setBusy(true); setError(''); setNotice('');
     try { await action(); } catch (cause) { setError(cause instanceof Error ? cause.message : 'api.unavailable'); }
     finally { setBusy(false); }
   }
-  function accept(next: DocumentView) { setDoc(next); setPreview(undefined); setSelected((i) => Math.min(i, Math.max(0, next.program.instructions.length - 1))); }
+  const canLeave = () => !draft || window.confirm(t('discardDraft'));
+  const chooseBlock = (next: DocumentView, block: ScenarioBlock, guard = true) => {
+    if (guard && !canLeave()) return;
+    setDraft(false);
+    if (block.kind === 'rule' && block.editable_rule && block.condition) {
+      setSelection({ key: ++counter.current, mode: 'rule', index: block.start, replaceEnd: block.end,
+        condition: block.condition, actions: block.action_indices.map((index) => next.program.instructions[index]) });
+    } else setSelection({ key: ++counter.current, mode: 'command', index: block.start,
+      instruction: next.program.instructions[block.start] });
+  };
+  const accept = (next: DocumentView, index?: number) => {
+    setDoc(next); setPreview(undefined); setDraft(false);
+    const block = next.program.blocks.find((b) => b.start === (index ?? selection?.index) && b.depth === 0);
+    if (block) chooseBlock(next, block, false); else setSelection(undefined);
+  };
   function open(action: () => Promise<DocumentView>) {
     if ((doc?.dirty || draft) && !window.confirm(t('closeDirty'))) return;
-    work(async () => { accept(await action()); setSelected(0); });
+    work(async () => { const next = await action(); setDoc(next); setSelection(undefined); setDraft(false); setQuery(''); setNotice(t('notice.opened')); });
   }
-  function commandPreview(edit: CommandEditRequest) {
-    if (draft && edit.action !== 'replace' && !window.confirm(t('discardDraft'))) return;
-    if (doc) work(async () => setPreview(await api.commandPreview(doc.id, edit)));
+  function newRule() {
+    if (!doc || !canLeave()) return;
+    setSelection({ key: ++counter.current, mode: 'rule', index: doc.program.instructions.length }); setDraft(false);
+  }
+  function choose(spec: CommandSpec) {
+    if (!doc || !canLeave()) return;
+    if (spec.opcode === 35) {
+      setSelection({ key: ++counter.current, mode: 'rule', index: doc.program.instructions.length,
+        condition: { ...initialCondition(), kind: 'resources' } });
+    } else setSelection({ key: ++counter.current, mode: spec.kind === 'setting' || spec.kind === 'condition' || spec.kind === 'structure' || spec.group === 'values' ? 'command' : 'rule', opcode: spec.opcode,
+      index: spec.stage === 'preload' ? 0 : doc.program.instructions.length });
+    setDraft(false);
+  }
+  function submit(value: BuilderValue, showPreview: boolean) {
+    if (!doc) return;
+    work(async () => {
+      const edit = value.selection;
+      const result = edit.mode === 'rule' ? await api.rulePreview(doc.id, {
+        expected_revision: doc.revision, index: edit.index, replace_end: edit.replaceEnd,
+        condition: value.condition, actions: value.actions,
+      }) : await api.commandPreview(doc.id, { expected_revision: doc.revision, index: edit.index,
+        action: edit.instruction ? 'replace' : 'add', opcode: value.actions[0].opcode,
+        values: value.actions[0].values ?? [], text: value.actions[0].text });
+      if (showPreview) setPreview({ value: result, index: edit.index });
+      else { accept(await api.apply(doc.id, result), edit.index); setNotice(t('notice.applied')); }
+    });
   }
   function save(saveAs: boolean) {
+    if (!doc || busy) return;
     if (draft) { setError('document.unapplied_fields'); return; }
-    if (doc) work(async () => {
-      const receipt = await api.save(doc, saveAs);
-      accept(await api.document(doc.id));
-      setNotice(`${t('backup')}: ${receipt.backup}`);
-      if (receipt.warnings.length) setError(receipt.warnings[0].code);
+    work(async () => {
+      const receipt = await api.save(doc, saveAs); accept(await api.document(doc.id));
+      setNotice(`${t('backup')}: ${receipt.backup}`); if (receipt.warnings.length) setError(receipt.warnings[0].code);
       setRecoveries(await api.recoveries());
     });
   }
   const errorKey = `error.${error}`;
-  const errorText = t(errorKey) === errorKey ? t('error.generic') : t(errorKey);
-
+  const scenarioMatches = doc?.program.blocks.filter((block) => block.depth === 0 && blockMatches(block, doc.program, catalog, query, t)).length ?? 0;
   return <div className="app-shell">
-    <header className="topbar">
-      <div className="brand-mark" aria-hidden="true">W<span>II</span></div>
-      <div className="brand"><h1>{t('app.title')}</h1><span>{t('app.subtitle')}</span></div>
-      <div className="topbar-right"><span className="local-badge"><i />{t('offline')}</span>
-        <button className="quiet" onClick={() => setHelp(true)}>{t('help')}</button>
-        <button className="quiet" onClick={() => work(async () => { setRecoveries(await api.recoveries()); setShowRecovery(true); })}>{t('recoveries')}{recoveries.length ? ` (${recoveries.length})` : ''}</button>
-        <select aria-label="Language / Язык" value={locale} onChange={(event) => setLocale(event.target.value as Locale)}><option value="ru">Русский</option><option value="en">English</option></select>
-      </div>
+    <header className="topbar"><div className="brand-mark" aria-hidden="true">W<span>II</span></div><div className="brand"><h1>{t('app.title')}</h1><span>{t('app.subtitle')}</span></div>
+      <div className="global-search"><span aria-hidden="true">⌕</span><input ref={search} aria-label={t('search.global')} placeholder={t('search.global')} value={query} onChange={(event) => { setQuery(event.target.value); setGroup('all'); }} /><kbd>Ctrl K</kbd>
+        {query && <button className="icon-button" aria-label={t('search.clear')} onClick={() => setQuery('')}>×</button>}</div>
+      <div className="topbar-right"><button className="quiet" onClick={() => setHelp(true)}>{t('help')}</button><select aria-label="Language / Язык" value={locale} onChange={(event) => setLocale(event.target.value as Locale)}><option value="ru">Русский</option><option value="en">English</option></select></div>
     </header>
-    <nav className="toolbar">
-      <div className="toolbar-group"><button className="gold" disabled={busy} onClick={() => open(api.open)}><span aria-hidden="true">▱</span> {t('open')}</button>
-        <button disabled={busy} onClick={() => fileInput.current?.click()}>{t('import')}</button>
-        <button disabled={busy} onClick={() => open(api.create)}>{t('newfile')}</button>
-        <input ref={fileInput} aria-label={t('import')} hidden type="file" accept=".pud,.w2tr" onChange={(event) => {
-          const file = event.target.files?.[0]; if (file) open(() => api.import(file)); event.target.value = '';
-        }} /></div>
-      {doc && <div className="toolbar-group"><button disabled={busy || !doc.writable} onClick={() => work(async () => accept(await api.history(doc, false)))}>{t('undo')}</button>
-        <button disabled={busy} onClick={() => work(async () => setBackups(await api.backups(doc.id)))}>{t('backups')}</button>
-        <button disabled={busy || !doc.writable} onClick={() => work(async () => accept(await api.history(doc, true)))}>{t('redo')}</button>
-        <span className="toolbar-divider" /><button disabled={busy} onClick={() => save(true)}>{t('saveAs')}</button>
-        <button className="gold" disabled={busy} onClick={() => save(false)}>{t('save')}</button></div>}
-    </nav>
-    {error && error !== 'dialog.cancelled' && <div className="message error" role="alert">{errorText}<button onClick={() => setError('')} aria-label={t('close')}>×</button></div>}
-    {notice && <div className="message success" role="status">{notice}</div>}
-    {busy && <div className="loading-bar" aria-label={t('pending')} />}
-    {!doc ? <main className="welcome">
-      <div className="welcome-emblem" aria-hidden="true"><span>W</span><b>II</b></div>
-      <span className="eyebrow">{t('empty.formats')}</span><h2>{t('empty.title')}</h2><p>{t('empty.description')}</p>
-      <button className="gold welcome-open" disabled={busy} onClick={() => open(api.open)}>{t('open')} <span aria-hidden="true">→</span></button>
-      <div className="steps">{[1, 2, 3].map((number) => <article key={number}><span className="step-number">0{number}</span><h3>{t(`empty.step${number}`)}</h3><p>{t(`empty.detail${number}`)}</p></article>)}</div>
-    </main> : <main className="workspace" style={{ '--inspector-width': `${width}px` } as React.CSSProperties}>
-      <aside className="map-context"><span className="eyebrow">{doc.kind.toUpperCase()}</span><h2 className="filename">{doc.name}</h2>
-        <span className={`document-state ${doc.dirty ? 'dirty' : ''}`}>{t(doc.dirty ? 'unsaved' : 'saved')}</span>
-        <div className="capacity"><span>{t('capacity')}</span><strong>{doc.program.length ?? '—'} <small>/ {doc.kind === 'pud' ? doc.capacity.toLocaleString() : '∞'} {t('bytes')}</small></strong>
-          <progress max={doc.kind === 'pud' ? doc.capacity : (doc.program.length ?? 1)} value={doc.program.length ?? 0} /></div>
-        <h3 className="section-label">{t('sections')}</h3><ul className="section-list">{doc.sections.map((section, i) => <li key={i}><span>{section.tag}</span><small>{section.size.toLocaleString()}</small></li>)}</ul>
-        <div className="revision">{t('revision')} {doc.revision}</div>
-      </aside>
-      <section className="sequence"><div className="pane-heading"><div><span className="eyebrow">{instructions.length} {t('count')}</span><h2>{t('triggers')}</h2></div></div>
-        {!doc.writable && <div className="readonly">{t('readonly')}</div>}
-        <input className="search" aria-label={t('search')} placeholder={t('search')} value={query} onChange={(event) => setQuery(event.target.value)} />
-        <div className="command-list" role="listbox" aria-label={t('triggers')}>{instructions.map((instruction, index) => {
-          if (query && !t(`command.${instruction.opcode}`).toLowerCase().includes(query.toLowerCase())) return null;
-          return <button role="option" aria-selected={selected === index} className={`command-row ${selected === index ? 'selected' : ''}`} key={index} onClick={() => {
-            if (index !== selected && draft && !window.confirm(t('discardDraft'))) return; setSelected(index);
-          }}>
-            <span className="row-number">{String(index + 1).padStart(2, '0')}</span><span className="command-icon" aria-hidden="true">{[22, 33, 23].includes(instruction.opcode) ? '◇' : '›'}</span>
-            <span className="command-label"><strong>{t(`command.${instruction.opcode}`)}</strong><small>{instruction.text ?? instruction.fields.map((field) => `${t(field.label_key)}: ${field.value}`).join(' · ')}</small></span>
-            <span className="byte-offset">{instruction.offset}</span>
-          </button>;
-        })}</div>
-        <div className="add-command"><select aria-label={t('add')} value={opcode} disabled={!doc.writable || busy} onChange={(event) => setOpcode(Number(event.target.value))}>
-          {catalog.map((spec) => <option key={spec.opcode} value={spec.opcode}>{t(spec.name_key)}</option>)}</select>
-          <button disabled={!doc.writable || busy} onClick={() => commandPreview({ action: 'add', index: instructions.length, expected_revision: doc.revision, opcode, values: [] })}>＋ {t('add')}</button></div>
-        <div className={`validation ${diagnostics.length ? 'has-errors' : ''}`}><span>{diagnostics.length ? '!' : '✓'} {t('diagnostics')}</span>
-          {diagnostics.length ? diagnostics.map((fault, i) => <p key={i}>{t(`error.${fault.code}`)} {fault.offset != null ? `(${fault.offset})` : ''}</p>) : <p>{t('valid')}</p>}</div>
-      </section>
-      <Inspector instruction={instructions[selected]} index={selected} revision={doc.revision} disabled={busy || !doc.writable} t={t} preview={commandPreview} onDraftChange={setDraft} />
-    </main>}
-    <footer><span><i className="status-dot" />{t('localHint')}</span>{doc && <label className="resize">{t('resize')}<input aria-label={t('resize')} type="range" min="250" max="450" value={width} onChange={(event) => setWidth(Number(event.target.value))} /></label>}<span>v0.1.0</span></footer>
-    {preview && doc && <Preview preview={preview} document={doc} busy={busy} t={t} cancel={() => setPreview(undefined)} apply={() => work(async () => accept(await api.apply(doc.id, preview)))} />}
-    {help && <div className="overlay"><section role="dialog" aria-modal="true" className="dialog"><h2>{t('help')}</h2><p>{t('help.body')}</p><button className="gold" onClick={() => setHelp(false)}>{t('close')}</button></section></div>}
-    {showRecovery && <div className="overlay"><section role="dialog" aria-modal="true" className="dialog"><h2>{t('recoveries')}</h2>
-      {recoveries.map((entry) => <div className="recovery-entry" key={entry.id}><span>{entry.name} · {t('revision')} {entry.revision}</span><button disabled={busy} onClick={() => {
-        if (doc?.dirty && !window.confirm(t('closeDirty'))) return;
-        work(async () => { accept(await api.recover(entry.id)); setShowRecovery(false); });
-      }}>{t('recover')}</button></div>)}
-      <button onClick={() => setShowRecovery(false)}>{t('close')}</button></section></div>}
-    {backups && doc && <div className="overlay"><section role="dialog" aria-modal="true" className="dialog"><h2>{t('backups')}</h2>
-      {!backups.length && <p>{t('backups.empty')}</p>}
-      {backups.map((entry) => <div className="recovery-entry" key={entry.id}><span>{new Date(entry.created_unix * 1000).toLocaleString(locale)} · {entry.size.toLocaleString()} {t('bytes')}</span>
-        <button disabled={busy} onClick={() => {
-          if (!window.confirm(t('restore.confirm'))) return;
-          work(async () => { const result = await api.restore(doc, entry.id); accept(result.document); setBackups(undefined); setNotice(`${t('backup')}: ${result.receipt.backup}`); });
-        }}>{t('recover')}</button></div>)}
-      <button onClick={() => setBackups(undefined)}>{t('close')}</button></section></div>}
+    <nav className="toolbar"><div className="toolbar-group"><button disabled={busy} onClick={() => open(api.open)}>▱ {t('open')}</button><button disabled={busy} onClick={() => fileInput.current?.click()}>{t('import')}</button>
+      <button disabled={busy} onClick={() => open(api.create)}>＋ {t('newfile')}</button><input ref={fileInput} aria-label={t('import')} hidden type="file" accept=".pud,.w2tr" onChange={(event) => { const file = event.target.files?.[0]; if (file) open(() => api.import(file)); event.target.value = ''; }} /></div>
+      {doc && <div className="toolbar-group"><button disabled={busy || !doc.writable} onClick={() => { if (canLeave()) work(async () => accept(await api.history(doc, false))); }}>{t('undo')}</button><button disabled={busy || !doc.writable} onClick={() => { if (canLeave()) work(async () => accept(await api.history(doc, true))); }}>{t('redo')}</button>
+        <button disabled={busy} onClick={() => work(async () => setBackups(await api.backups(doc.id)))}>{t('backups')}</button><button disabled={busy} onClick={() => save(true)}>{t('saveAs')}</button><button className="gold" disabled={busy} onClick={() => save(false)}>{t('save')}</button></div>}
+      <button className="quiet recovery-button" onClick={() => work(async () => { setRecoveries(await api.recoveries()); setShowRecovery(true); })}>{t('recoveries')}{recoveries.length ? ` (${recoveries.length})` : ''}</button></nav>
+    {error && error !== 'dialog.cancelled' && <div className="message error" role="alert">{t(errorKey) === errorKey ? t('error.generic') : t(errorKey)}<button className="icon-button" onClick={() => setError('')} aria-label={t('close')}>×</button></div>}
+    {notice && <div className="message success" role="status">✓ {notice}</div>}{busy && <div className="loading-bar" aria-label={t('pending')} />}
+    {doc && <div className="document-bar"><span className="file-kind">{doc.kind.toUpperCase()}</span><h2>{doc.name}</h2><span className={`document-state ${doc.dirty ? 'dirty' : ''}`}>{t(draft ? 'draft' : doc.dirty ? 'unsaved' : 'saved')}</span>
+      <span className="document-size">{doc.program.length ?? '—'} {doc.kind === 'pud' ? `/ ${doc.capacity.toLocaleString()}` : ''} {t('bytes')}</span></div>}
+    <main className={`workspace ${!doc ? 'no-document' : ''}`} style={{ '--inspector-width': `${width}px` } as React.CSSProperties}>
+      <Catalog catalog={catalog} query={query} group={group} onGroup={setGroup} onChoose={choose} onNewRule={newRule} locale={locale} t={t} disabled={busy || !doc?.writable} />
+      {doc ? <Scenario document={doc} catalog={catalog} query={query} locale={locale} t={t} selected={selection?.index} busy={busy} onSelect={(block) => chooseBlock(doc, block)} onInstruction={(index) => {
+        if (canLeave()) { setSelection({ key: ++counter.current, mode: 'command', index, instruction: doc.program.instructions[index] }); setDraft(false); }
+      }} onNewRule={newRule} onBlock={(block, action) => {
+        if (!canLeave()) return; work(async () => { const result = await api.blockPreview(doc.id, { expected_revision: doc.revision, start: block.start, action }); accept(await api.apply(doc.id, result), action === 'duplicate' ? block.end : block.start); setNotice(t('notice.applied')); });
+      }} /> : <section className="welcome"><div className="welcome-emblem" aria-hidden="true">W<span>II</span></div><span className="eyebrow">WARCRAFT II</span><h2>{t('welcome.title')}</h2><p>{t('welcome.body')}</p><div className="welcome-actions"><button className="gold" disabled={busy} onClick={() => open(api.create)}>{t('newfile')}</button><button disabled={busy} onClick={() => open(api.open)}>{t('open')}</button></div>
+        <div className="welcome-flow"><span className="type-label condition-label">{t('when')}</span><span>→</span><span className="type-label action-label">{t('then')}</span><span>→</span><span className="type-label setting-label">{t('save')}</span></div></section>}
+      <Builder selection={selection} catalog={catalog} locale={locale} t={t} busy={busy || !doc?.writable} onSubmit={submit} onDraft={setDraft} onError={setError} onClose={() => { if (canLeave()) { setSelection(undefined); setDraft(false); } }} />
+    </main>
+    <footer><span className={diagnostics.length ? 'status-warning' : ''}>● {doc ? t(diagnostics.length ? 'diagnostics' : 'valid') : t('localHint')}{query && ` · ${t('search.scenarioMatches')}: ${scenarioMatches}`}</span>
+      <label className="resize">{t('resize')}<input aria-label={t('resize')} type="range" min={340} max={560} value={width} onChange={(e) => setWidth(Number(e.target.value))} /></label><span>v0.2.0</span></footer>
+    {diagnostics.length > 0 && <details className="diagnostic-details"><summary>{t('diagnostics')} ({diagnostics.length})</summary>{diagnostics.map((fault, index) => <p key={index}>{t(`error.${fault.code}`)} {fault.offset != null ? `(${fault.offset})` : ''}</p>)}</details>}
+    {preview && doc && <Preview preview={preview.value} document={doc} busy={busy} t={t} cancel={() => setPreview(undefined)} apply={() => work(async () => { accept(await api.apply(doc.id, preview.value), preview.index); setNotice(t('notice.applied')); })} />}
+    <FileDialogs help={help} setHelp={setHelp} t={t} locale={locale} busy={busy} recoveries={showRecovery ? recoveries : undefined} closeRecovery={() => setShowRecovery(false)} backups={backups} closeBackups={() => setBackups(undefined)}
+      onRecover={(id) => { if ((doc?.dirty || draft) && !window.confirm(t('closeDirty'))) return; work(async () => { accept(await api.recover(id)); setShowRecovery(false); }); }}
+      onRestore={(id) => { if (!doc || !window.confirm(t('restore.confirm'))) return; work(async () => { const result = await api.restore(doc, id); accept(result.document); setBackups(undefined); setNotice(`${t('backup')}: ${result.receipt.backup}`); }); }} />
   </div>;
 }

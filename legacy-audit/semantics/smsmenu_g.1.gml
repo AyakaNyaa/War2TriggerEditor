@@ -1,0 +1,27 @@
+var_mmsize = 2
+
+mmi[00] = lstr(166)
+sms[00] = 9
+  smi[00,00] = ds_list_find_value(drawer2.lg,34)//hp
+  smi[00,01] = ds_list_find_value(drawer2.lg,38)//mana
+  smi[00,02] = ds_list_find_value(drawer2.lg,42)//mov
+  smi[00,03] = ds_list_find_value(drawer2.lg,43)//sprite
+  smi[00,04] = ds_list_find_value(drawer2.lg,44)//owner
+  smi[00,05] = ds_list_find_value(drawer2.lg,45)//color
+  smi[00,06] = ds_list_find_value(drawer2.lg,39)//id
+  smi[00,07] = ds_list_find_value(drawer2.lg,37)//commands
+  smi[00,08] = ds_list_find_value(drawer2.lg,130)//resources
+mmi[01] = lstr(167)
+sms[01] = 12
+  smi[01,00] = ds_list_find_value(drawer2.lg,0)//dx
+  smi[01,01] = ds_list_find_value(drawer2.lg,2)//dy
+  smi[01,02] = ds_list_find_value(drawer2.lg,24)//x
+  smi[01,03] = ds_list_find_value(drawer2.lg,26)//y
+  smi[01,04] = ds_list_find_value(drawer2.lg,68)//inviz
+  smi[01,05] = ds_list_find_value(drawer2.lg,70)//shield
+  smi[01,06] = ds_list_find_value(drawer2.lg,72)//blood
+  smi[01,07] = ds_list_find_value(drawer2.lg,74)//hast
+  smi[01,08] = ds_list_find_value(drawer2.lg,120)//kills
+  smi[01,09] = ds_list_find_value(drawer2.lg,132)//order x
+  smi[01,10] = ds_list_find_value(drawer2.lg,134)//order y
+  smi[01,11] = ds_list_find_value(drawer2.lg,46)//order

@@ -161,6 +161,46 @@ async fn command_preview(
     run(state, move |editor| editor.command_preview(&id, request)).await
 }
 
+#[utoipa::path(post, path = "/api/v1/commands/draft", request_body = CommandDraftRequest,
+    responses((status = 200, body = Instruction)))]
+async fn command_draft(
+    State(state): State<ServerState>,
+    Json(request): Json<CommandDraftRequest>,
+) -> ApiResult<Json<Instruction>> {
+    run(state, move |editor| {
+        editor.services.triggers.draft(&request)
+    })
+    .await
+}
+
+#[utoipa::path(post, path = "/api/v1/documents/{id}/rules/preview", request_body = RuleRequest,
+    params(("id" = String, Path)), responses((status = 200, body = ChangePreview)))]
+async fn rule_preview(
+    State(state): State<ServerState>,
+    Path(id): Path<String>,
+    Json(request): Json<RuleRequest>,
+) -> ApiResult<Json<ChangePreview>> {
+    run(state, move |editor| editor.rule_preview(&id, request)).await
+}
+
+#[utoipa::path(post, path = "/api/v1/documents/{id}/blocks/preview", request_body = BlockRequest,
+    params(("id" = String, Path)), responses((status = 200, body = ChangePreview)))]
+async fn block_preview(
+    State(state): State<ServerState>,
+    Path(id): Path<String>,
+    Json(request): Json<BlockRequest>,
+) -> ApiResult<Json<ChangePreview>> {
+    run(state, move |editor| {
+        editor.block_preview(
+            &id,
+            request.expected_revision,
+            request.start,
+            &request.action,
+        )
+    })
+    .await
+}
+
 #[utoipa::path(post, path = "/api/v1/documents/{id}/save", request_body = SaveRequest,
     params(("id" = String, Path)), responses((status = 200, body = SaveReceipt)))]
 async fn save(
@@ -220,6 +260,9 @@ async fn recover(
         apply,
         save,
         command_preview,
+        command_draft,
+        rule_preview,
+        block_preview,
         recoveries,
         backups,
         restore
@@ -244,7 +287,13 @@ async fn recover(
         ChangePreview,
         RevisionRequest,
         SaveRequest,
-        SaveReceipt
+        SaveReceipt,
+        CommandDraftRequest,
+        RuleCondition,
+        RuleRequest,
+        ScenarioBlock,
+        CompiledRule,
+        BlockRequest
     ))
 )]
 struct Definition;
@@ -327,6 +376,7 @@ pub fn router(state: ServerState) -> Router {
     let api = Router::new()
         .route("/health", get(health))
         .route("/catalog", get(catalog))
+        .route("/commands/draft", post(command_draft))
         .route("/openapi.json", get(schema))
         .route("/recoveries", get(recoveries))
         .route("/recoveries/{id}/open", post(recover))
@@ -337,6 +387,8 @@ pub fn router(state: ServerState) -> Router {
         .route("/documents/{id}/changes/preview", post(preview))
         .route("/documents/{id}/changes/apply", post(apply))
         .route("/documents/{id}/command-preview", post(command_preview))
+        .route("/documents/{id}/rules/preview", post(rule_preview))
+        .route("/documents/{id}/blocks/preview", post(block_preview))
         .route("/documents/{id}/save", post(save))
         .route("/documents/{id}/backups", get(backups))
         .route("/documents/{id}/restore", post(restore))

@@ -16,7 +16,7 @@ fn layout(bytes: &[u8]) -> Vec<(usize, usize, &'static str, u32)> {
         7 => vec![
             (1, 1, "variable", 255),
             (2, 1, "playerMask", 255),
-            (3, 1, "flags", 3),
+            (3, 1, "extraPlayers", 3),
             (4, 1, "parameter", 59),
         ],
         8 => vec![
@@ -52,8 +52,9 @@ fn layout(bytes: &[u8]) -> Vec<(usize, usize, &'static str, u32)> {
             (4, 1, "player", 15),
             (5, 1, if bytes[0] == 20 { "value" } else { "variable" }, 255),
         ],
-        21 => vec![(1, 1, "variable", 255), (2, 1, "enabled", 1)],
-        22 | 30 | 33 => vec![(1, 1, "variable", 255)],
+        21 => vec![(1, 1, "flag", 255), (2, 1, "enabled", 1)],
+        22 | 33 => vec![(1, 1, "flag", 255)],
+        30 => vec![(1, 1, "variable", 255)],
         26 => vec![
             (1, 1, "player", 15),
             (2, 1, "argument", 5),
@@ -86,6 +87,18 @@ fn text_area(bytes: &[u8]) -> Option<usize> {
 }
 
 pub fn describe(bytes: &[u8]) -> (Vec<NumericField>, Option<String>) {
+    let text = text_area(bytes).map(|start| {
+        WINDOWS_1251
+            .decode_without_bom_handling(&bytes[start..])
+            .0
+            .trim_end_matches('\0')
+            .to_owned()
+    });
+    if !matches!(bytes[0], 1 | 3..=22 | 26 | 30 | 33 | 34 | 37 | 108 | 118 | 120..=123) {
+        if let Some(fields) = crate::legacy_forms::describe(bytes) {
+            return (fields, text);
+        }
+    }
     let fields = layout(bytes)
         .into_iter()
         .map(|(offset, width, key, max)| {
@@ -102,13 +115,6 @@ pub fn describe(bytes: &[u8]) -> (Vec<NumericField>, Option<String>) {
             }
         })
         .collect();
-    let text = text_area(bytes).map(|start| {
-        WINDOWS_1251
-            .decode_without_bom_handling(&bytes[start..])
-            .0
-            .trim_end_matches('\0')
-            .to_owned()
-    });
     (fields, text)
 }
 
@@ -116,7 +122,8 @@ fn options(key: &str, max: u32) -> Vec<FieldOption> {
     let group = match key {
         "player" | "player2" => "player",
         "unit" | "unit2" => "unit",
-        "comparison" | "stat" | "operation" | "resource" | "order" | "effect" | "parameter" => key,
+        "comparison" | "stat" | "operation" | "resource" | "order" | "effect" | "parameter"
+        | "extraPlayers" => key,
         _ => return Vec::new(),
     };
     (0..=max)
@@ -128,6 +135,11 @@ fn options(key: &str, max: u32) -> Vec<FieldOption> {
 }
 
 pub fn edit(instruction: &Instruction, values: &[u32], text: Option<&str>) -> Result<Vec<u8>> {
+    if !matches!(instruction.opcode, 1 | 3..=22 | 26 | 30 | 33 | 34 | 37 | 108 | 118 | 120..=123) {
+        if let Some(result) = crate::legacy_forms::edit(&instruction.bytes, values) {
+            return result;
+        }
+    }
     let mut bytes = instruction.bytes.clone();
     let layout = layout(&bytes);
     if values.len() != layout.len() {

@@ -114,6 +114,8 @@ zlib-потоки не нужны для обычной сборки и не в�
 python audit_package.py "путь/к/Paket_Redaktor_triggerov_dlya_war2.zip"
 python inspect_samples.py
 python tools/extract_catalog.py
+python tools/audit_editor_semantics.py
+python tools/build_form_schema.py
 ```
 
 Сторонние материалы исходного редактора связаны с Edo, а переводческие
