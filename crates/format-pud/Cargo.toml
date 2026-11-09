@@ -1,0 +1,10 @@
+[package]
+name = "format-pud"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+contracts.workspace = true
+
+[lints]
+workspace = true

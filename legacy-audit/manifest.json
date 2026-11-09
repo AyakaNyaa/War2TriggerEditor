@@ -1,0 +1,107 @@
+[
+  {
+    "file": "MAINICON.ico",
+    "size": 1078,
+    "sha256": "7b3634ee8958a46ac3386837e0e79275e4349f51a6ae5f9a76a9d95ccdaf1d7f"
+  },
+  {
+    "file": "tr/capture flag v3.pud",
+    "size": 36078,
+    "sha256": "965fe79e06bdfc399e28fa2268e64ffb0441863d0594a21e40c7a4a7365ae060"
+  },
+  {
+    "file": "tr/capture flag.w2tr",
+    "size": 297,
+    "sha256": "f32906a4f20d585cb285c21927c10437062cc99ead4b5cdf930c70d765e384eb"
+  },
+  {
+    "file": "tr/desert strike v4.pud",
+    "size": 122430,
+    "sha256": "46d14078dd4b01e9b4fb08effebff01a03416a662c87ccbf80b4bc30af6ea0c9"
+  },
+  {
+    "file": "tr/desert strike.w2tr",
+    "size": 958,
+    "sha256": "6bb53c223a0f13ed325a2c795dcd473f11c71b505f4678b3cde478c2f2729c80"
+  },
+  {
+    "file": "tr/edo def v1.4.pud",
+    "size": 122886,
+    "sha256": "ba683a27bfeec9b277e5dd61c4c0ca0697384309e203ca3beb9ac3c52ab0e215"
+  },
+  {
+    "file": "tr/edo def.w2tr",
+    "size": 2054,
+    "sha256": "63ff9afbc88b1ea162db2505d27527ef699630c99c3e4519931a91c44d7eff67"
+  },
+  {
+    "file": "tr/ex/1.w2tr",
+    "size": 366,
+    "sha256": "df25d3a2b4efdebf9a30f2a527203673af476d4275041751828ce49fbea85eb7"
+  },
+  {
+    "file": "tr/ex/2.w2tr",
+    "size": 356,
+    "sha256": "5b323f2aa1f20439c684fab86b8b6905b401ea68112aafc42c6c2d2f7aca780e"
+  },
+  {
+    "file": "tr/ex/3.w2tr",
+    "size": 217,
+    "sha256": "6977695a9aed6589cac4a96544971c66b59f9008c8ced177b7bf1cd6c2e40b76"
+  },
+  {
+    "file": "tr/ex/4.w2tr",
+    "size": 238,
+    "sha256": "49274c1d98950752baf444c6512793104d28ebaa6122ca06d39f9f7af2df0b1b"
+  },
+  {
+    "file": "tr/ex/5.w2tr",
+    "size": 270,
+    "sha256": "61f2262bf86f9dc0521955de728364a2b178cd08db47996a10a383318c70ca2e"
+  },
+  {
+    "file": "tr/ex/6.w2tr",
+    "size": 213,
+    "sha256": "d056ef21aa7dd2dedea152adcff19c803d4d4c075f1d5e8c6a07d2461096b03e"
+  },
+  {
+    "file": "tr/ex/read.txt",
+    "size": 1464,
+    "sha256": "02045b058afe5fab4f09b7b07ae1f032a31ccc80b01fcc2a70767aedc96564b3"
+  },
+  {
+    "file": "tr/hero surv v1.3.pud",
+    "size": 122648,
+    "sha256": "60dd3d0a31d9ad2d4341a1988459087bb3756ef2730267aa4f1893274f167909"
+  },
+  {
+    "file": "tr/hero surv.w2tr",
+    "size": 9068,
+    "sha256": "df8c61c86e56975f64e03dfc28448a4e0d159a1c1178cc6130c45358c32f6e6e"
+  },
+  {
+    "file": "triggers.txt",
+    "size": 19303,
+    "sha256": "a43f94a7f811911cbfcde511134c6a7fcb11810681a70e2bf276fa147e7f9eb9"
+  },
+  {
+    "file": "w2tedit_eng.lang",
+    "size": 14657,
+    "sha256": "1a7d1f54fa27554203cb0b55b6acbeb8ca6636009543e120748494fee5370fae"
+  },
+  {
+    "file": "w2tedit_rus.lang",
+    "size": 16858,
+    "sha256": "c888f7be4e5d5b74724e7ccc8d7f9c3d165cc5fe94b966acdeb66a67599886c9"
+  },
+  {
+    "file": "war2 trigger edit.exe",
+    "size": 5843410,
+    "sha256": "0a804423085f450525705e1df0eec26d748fd2adeab10aff830d70fdb98bf1ea"
+  },
+  {
+    "file": "war2_trigger_edit.gmk",
+    "size": 3147186,
+    "sha256": "a954376eb88a3f00ae79f3a563d1d9ecb1740672fca30175b2c95618509a0f14"
+  }
+]

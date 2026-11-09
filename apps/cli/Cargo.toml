@@ -1,0 +1,11 @@
+[package]
+name = "war2-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+reqwest.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

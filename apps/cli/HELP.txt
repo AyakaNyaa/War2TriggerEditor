@@ -1,0 +1,13 @@
+War2 Trigger Editor API client
+
+Usage:
+  war2-cli SESSION_FILE inspect FILE
+  war2-cli SESSION_FILE validate FILE
+  war2-cli SESSION_FILE roundtrip FILE
+
+The session file is created only when WAR2_SESSION_FILE is set before starting
+the editor. It contains local authentication credentials; do not share it.
+
+All parsing, validation and serialization go through the editor's HTTP API.
+roundtrip compares the exported bytes in memory and never overwrites FILE.
+Results are JSON. Exit status: 0 success, 1 request/file error, 2 failed validation.

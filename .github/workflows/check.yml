@@ -1,0 +1,43 @@
+name: Windows checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
+      - name: Install Rust
+        run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
+      - name: Select Rust
+        run: rustup override set 1.98.1
+      - name: Install frontend dependencies
+        run: npm.cmd ci --prefix apps/frontend --ignore-scripts --no-audit --no-fund
+      - name: Build frontend
+        run: npm.cmd run build --prefix apps/frontend
+      - name: Check Rust formatting
+        run: cargo fmt --all --check
+      - name: Check Rust code
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Test Rust workspace
+        run: cargo test --workspace --locked
+      - name: Build Windows applications
+        run: cargo build --workspace --locked
+      - name: Test UI, API and CLI
+        run: npm.cmd test --prefix apps/frontend
+      - name: Enforce 500 lines and star dependencies
+        run: python tools/check_project.py

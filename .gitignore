@@ -1,0 +1,13 @@
+/target/
+/apps/frontend/node_modules/
+/apps/frontend/dist/
+/apps/desktop/gen/
+/playwright-report/
+/apps/frontend/test-results/
+/.local/
+__pycache__/
+*.tmp
+/builds/
+/legacy-audit/gmk-streams/
+/legacy-audit/source/*
+!/legacy-audit/source/tr/

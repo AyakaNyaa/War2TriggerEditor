@@ -1,0 +1,135 @@
+
+FILE MAINICON.ico size=1078
+
+FILE tr\capture flag v3.pud size=36078
+     0 b'TYPE' size=16
+    24 b'VER ' size=2
+    34 b'DESC' size=32
+    74 b'OWNR' size=16
+    98 b'ERA ' size=2
+   108 b'DIM ' size=4
+   120 b'UDTA' size=5696
+  5824 b'UGRD' size=782
+  6614 b'ALOW' size=384
+  7006 b'SIDE' size=16
+  7030 b'SGLD' size=32
+  7070 b'SLBR' size=32
+  7110 b'SOIL' size=32
+  7150 b'AIPL' size=16
+  7174 b'MTXM' size=8192
+ 15374 b'SQM ' size=8192
+ 23574 b'OILM' size=4096
+ 27678 b'REGM' size=8192
+ 35878 b'UNIT' size=192
+parsed=36078 total=36078 remaining=0
+
+FILE tr\capture flag.w2tr size=297
+head=68 5d 01 01 50 47 40 3a 00 18 3a 01 31 3a 08 18 3a 09 31 1f 11 64 1f 0b 0a 1f 0a 0a 1f 06 50 1f 08 fa 06 00 18 06 03 4a e8 03 06 00 6a 06 02 27 02 00 02 06 02 27 03 00 03 06 10 00 06 12 ff 09 1e 01 08 01 00 00 00 16 00 09 1f 1f 1f 1f 06 00
+
+FILE tr\desert strike v4.pud size=122430
+     0 b'TYPE' size=16
+    24 b'VER ' size=2
+    34 b'DESC' size=32
+    74 b'OWNR' size=16
+    98 b'ERA ' size=2
+   108 b'DIM ' size=4
+   120 b'UDTA' size=5696
+  5824 b'UGRD' size=782
+  6614 b'ALOW' size=384
+  7006 b'SIDE' size=16
+  7030 b'SGLD' size=32
+  7070 b'SLBR' size=32
+  7110 b'SOIL' size=32
+  7150 b'AIPL' size=16
+  7174 b'MTXM' size=32768
+ 39950 b'SQM ' size=32768
+ 72726 b'OILM' size=16384
+ 89118 b'REGM' size=32768
+121894 b'UNIT' size=528
+parsed=122430 total=122430 remaining=0
+
+FILE tr\desert strike.w2tr size=958
+head=5e 68 6a 00 01 6a 01 01 6a 02 01 6a 04 02 6a 05 02 6a 06 02 01 01 67 64 26 0a 2b 01 04 2b 00 03 2b 02 05 1f 01 03 1f 03 01 1f 04 0a 1f 05 0a 1f 06 05 1f 07 01 1f 08 3c 1f 09 05 1f 12 05 1f 0d 28 1f 0e 14 1f 10 32 1f 0f 40 1f 0b 29 1f 11 20
+
+FILE tr\edo def v1.4.pud size=122886
+     0 b'TYPE' size=16
+    24 b'VER ' size=2
+    34 b'DESC' size=32
+    74 b'OWNR' size=16
+    98 b'ERA ' size=2
+   108 b'DIM ' size=4
+   120 b'UDTA' size=5696
+  5824 b'UGRD' size=782
+  6614 b'ALOW' size=384
+  7006 b'SIDE' size=16
+  7030 b'SGLD' size=32
+  7070 b'SLBR' size=32
+  7110 b'SOIL' size=32
+  7150 b'AIPL' size=16
+  7174 b'MTXM' size=32768
+ 39950 b'SQM ' size=32768
+ 72726 b'OILM' size=16384
+ 89118 b'REGM' size=32768
+121894 b'UNIT' size=984
+parsed=122886 total=122886 remaining=0
+
+FILE tr\edo def.w2tr size=2054
+head=67 64 33 3b 4d 50 3a 01 14 3a 03 17 3a 05 18 3a 07 15 0a 01 27 00 30 05 27 01 30 67 27 02 30 37 2b 01 1e 2b 06 64 1f 08 32 1f 09 05 1f 0c 0a 1f 0d 19 1f 11 28 06 00 02 06 03 4a e8 03 06 00 2d 06 02 2c 07 00 00 1e fa 08 fa 00 00 fa 16 fa 06
+
+FILE tr\ex\1.w2tr size=366
+head=05 00 00 07 01 01 00 06 07 02 01 00 07 05 03 00 0d 03 01 0d 03 02 08 03 00 00 00 16 00 19 17 07 0a 01 00 27 07 0b 01 00 28 07 0c 01 00 2c 07 0d 01 00 08 07 0e 02 00 2b 05 14 06 05 15 03 05 16 02 05 17 0a 08 0a 02 14 01 08 0b 02 15 02 08 0c
+
+FILE tr\ex\2.w2tr size=356
+head=42 01 1c 33 05 00 00 06 00 2e 1e 01 08 01 00 00 00 16 00 19 17 09 0a 0a 14 14 06 01 1e 01 08 01 01 00 01 07 02 10 00 10 07 03 bd 00 31 08 02 00 00 02 08 03 00 00 03 16 02 16 03 18 17 17 fe ff 00 fd 00 00 05 5f 7a 65 72 6f 01 00 05 5f 68 65
+
+FILE tr\ex\3.w2tr size=217
+head=41 01 1c 2a 03 01 2a 02 01 29 05 00 00 05 0a 02 05 0b 03 07 01 01 00 08 07 02 80 00 10 08 01 05 0a 01 08 02 05 0b 02 16 01 16 02 19 17 17 06 00 33 1e 05 08 05 00 00 00 16 00 18 17 fe ff 00 fd 00 00 05 5f 7a 65 72 6f 01 00 0d 5f 72 65 64 5f
+
+FILE tr\ex\4.w2tr size=238
+head=27 00 18 65 27 01 2c 66 05 00 00 06 00 18 1e 01 06 00 2c 1e 02 08 01 00 00 00 08 02 00 00 01 16 00 19 17 16 01 19 17 07 03 00 01 3a 07 04 00 01 39 05 05 00 0d 05 03 0d 05 04 08 05 00 00 02 16 02 18 17 fe ff 00 fd 00 00 05 5f 7a 65 72 6f 01
+
+FILE tr\ex\5.w2tr size=270
+head=3a 0b 15 52 00 15 05 00 00 07 01 02 00 06 07 02 02 00 07 05 03 00 0d 03 01 0d 03 02 08 03 00 00 00 16 00 19 17 23 00 00 50 c3 00 00 04 01 16 01 19 17 07 0a 01 00 06 07 0b 01 00 07 05 0c 00 0d 0c 0a 0d 0c 0b 08 0c 00 00 02 16 02 18 17 fe ff
+
+FILE tr\ex\6.w2tr size=213
+head=56 00 30 0c 64 00 08 64 00 00 03 16 03 56 00 14 17 1d 05 00 00 06 00 14 1e 01 08 01 00 00 00 16 00 19 17 09 01 02 05 06 06 01 1e 01 08 01 01 00 01 16 01 08 64 00 00 02 16 02 25 0a 0d 48 65 6c 6c 6f 20 54 68 65 72 65 20 21 17 05 64 01 0b 64
+
+FILE tr\ex\read.txt size=1464
+
+FILE tr\hero surv v1.3.pud size=122648
+     0 b'TYPE' size=16
+    24 b'VER ' size=2
+    34 b'DESC' size=32
+    74 b'OWNR' size=16
+    98 b'ERA ' size=2
+   108 b'ERAX' size=2
+   118 b'DIM ' size=4
+   130 b'UDTA' size=5696
+  5834 b'UGRD' size=782
+  6624 b'ALOW' size=384
+  7016 b'SIDE' size=16
+  7040 b'SGLD' size=32
+  7080 b'SLBR' size=32
+  7120 b'SOIL' size=32
+  7160 b'AIPL' size=16
+  7184 b'MTXM' size=32768
+ 39960 b'SQM ' size=32768
+ 72736 b'OILM' size=16384
+ 89128 b'REGM' size=32768
+121904 b'UNIT' size=736
+parsed=122648 total=122648 remaining=0
+
+FILE tr\hero surv.w2tr size=9068
+head=68 6a 00 01 6a 01 01 6a 02 01 67 64 01 01 02 2e 0a 01 41 01 1c 52 00 33 27 00 3b 3b 2b 00 01 2b 01 01 2b 02 01 1f 05 19 1f 08 64 1f 07 01 3e 00 0a 00 2a 06 01 2a 05 03 29 03 00 01 01 03 00 02 01 03 01 02 01 04 00 01 01 04 00 02 01 04 02 01
+
+FILE triggers.txt size=19303
+
+FILE w2tedit_eng.lang size=14657
+
+FILE w2tedit_rus.lang size=16858
+
+FILE war2 trigger edit.exe size=5843410
+
+FILE war2_trigger_edit.gmk size=3147186
+head=91 d5 12 00 20 03 00 00 15 5f 99 2b 4c 3a ed 09 ec 01 bf 4f b6 49 6f 79 34 d3 13 3f 20 03 00 00 16 07 01 00 78 9c 7c 78 63 70 27 4c f0 66 6c db b6 6d db de d8 c6 2f b6 6d 3b d9 78 a3 8d 6d db b6 6d db c9 ed 7b f7 bf 2f f7 e1 ba aa 6b 50 33
+zlib_streams=150

@@ -1,0 +1,30 @@
+example 1 (considering player is RED)
+lose condition - all player units dead
+victory condition - build 6 farms and 3 barrack and 2 mills and 10 grunts AND kill blue castle
+additions - no
+
+example 2 (considering player is WHITE)
+lose condition - hero must survive
+victory condition - bring hero to region AND kill orange knights AND kill all enemy shipyards except blue (and player who is WHITE)
+additions - peons can build portals, portals can teleport to other portals
+
+example 3 (player color is not important here)
+lose condition - at least 2 RED footmans and at least 3 YELLOW ogres must survive
+victory condition - kill enemy hero
+additions - peons can build runestones; runestones give haste and blood.
+
+example 4 (player color is not important here)
+lose condition - heroes must survive
+victory condition - destroy all dark portals and runestones (of neutral player)
+addition - only Hadgar can destroy portal; only Tyralyon can destroy runestone
+
+example 5 (considering player is BLUE)
+lose condition - all player units dead OR red comp have more than 50000 gold
+victory condition - kill red
+addition - orc player can build hero Teron from TH on tier 2; Teron have death aura
+
+example 6 (player color is not important here)
+lose condition - hero survive
+victory condition - kill all enemies
+addition - when player bring hero to some region he will receive message (and receive it ONLY 1 time)
+AND hero get new ability after this

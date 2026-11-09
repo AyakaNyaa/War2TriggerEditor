@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.pud -text
+*.w2tr -text
+*.ico -text
+*.exe -text
+*.zip -text
+legacy-audit/source/tr/ex/read.txt -text whitespace=cr-at-eol
+legacy-audit/evidence/*.gml whitespace=-blank-at-eol

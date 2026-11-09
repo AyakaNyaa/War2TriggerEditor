@@ -1,0 +1,8 @@
+{
+  "comparison.0": "Equals (==)",
+  "comparison.1": "Not Equals (!=)",
+  "comparison.2": "Greater or Equals (>=)",
+  "comparison.3": "Smaller or Equals (<=)",
+  "comparison.4": "Greater (>)",
+  "comparison.5": "Smaller (<)"
+}

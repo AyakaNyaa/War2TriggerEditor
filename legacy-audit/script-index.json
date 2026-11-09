@@ -1,0 +1,227 @@
+[
+  {
+    "name": "load",
+    "stream": "03095622.bin",
+    "lines": 47
+  },
+  {
+    "name": "save",
+    "stream": "03095981.bin",
+    "lines": 43
+  },
+  {
+    "name": "break_text",
+    "stream": "03096428.bin",
+    "lines": 53
+  },
+  {
+    "name": "LU",
+    "stream": "03096832.bin",
+    "lines": 13
+  },
+  {
+    "name": "LP",
+    "stream": "03097015.bin",
+    "lines": 13
+  },
+  {
+    "name": "LS",
+    "stream": "03097197.bin",
+    "lines": 13
+  },
+  {
+    "name": "LR",
+    "stream": "03097394.bin",
+    "lines": 13
+  },
+  {
+    "name": "LG",
+    "stream": "03097575.bin",
+    "lines": 13
+  },
+  {
+    "name": "LJ",
+    "stream": "03097758.bin",
+    "lines": 13
+  },
+  {
+    "name": "LM",
+    "stream": "03097939.bin",
+    "lines": 13
+  },
+  {
+    "name": "LD",
+    "stream": "03098121.bin",
+    "lines": 13
+  },
+  {
+    "name": "LB",
+    "stream": "03098302.bin",
+    "lines": 13
+  },
+  {
+    "name": "INIT_LANG",
+    "stream": "03098483.bin",
+    "lines": 70
+  },
+  {
+    "name": "INIT_LISTS",
+    "stream": "03098964.bin",
+    "lines": 24
+  },
+  {
+    "name": "lstr",
+    "stream": "03099089.bin",
+    "lines": 4
+  },
+  {
+    "name": "GET_LANG",
+    "stream": "03099232.bin",
+    "lines": 31
+  },
+  {
+    "name": "GET_LISTS",
+    "stream": "03099532.bin",
+    "lines": 24
+  },
+  {
+    "name": "trig",
+    "stream": "03099656.bin",
+    "lines": 1323
+  },
+  {
+    "name": "creator",
+    "stream": "03102924.bin",
+    "lines": 1314
+  },
+  {
+    "name": "smenu",
+    "stream": "03104638.bin",
+    "lines": 127
+  },
+  {
+    "name": "add_ret",
+    "stream": "03105646.bin",
+    "lines": 80
+  },
+  {
+    "name": "LTN",
+    "stream": "03106022.bin",
+    "lines": 13
+  },
+  {
+    "name": "creator42",
+    "stream": "03106206.bin",
+    "lines": 64
+  },
+  {
+    "name": "LTR",
+    "stream": "03106459.bin",
+    "lines": 13
+  },
+  {
+    "name": "LTU",
+    "stream": "03106640.bin",
+    "lines": 13
+  },
+  {
+    "name": "creator6",
+    "stream": "03106823.bin",
+    "lines": 243
+  },
+  {
+    "name": "draw_text_amazing",
+    "stream": "03107576.bin",
+    "lines": 36
+  },
+  {
+    "name": "LCOL",
+    "stream": "03107910.bin",
+    "lines": 26
+  },
+  {
+    "name": "save_tr",
+    "stream": "03108175.bin",
+    "lines": 39
+  },
+  {
+    "name": "field_click",
+    "stream": "03108559.bin",
+    "lines": 377
+  },
+  {
+    "name": "check_click",
+    "stream": "03109608.bin",
+    "lines": 76
+  },
+  {
+    "name": "LAT",
+    "stream": "03109823.bin",
+    "lines": 13
+  },
+  {
+    "name": "LATU",
+    "stream": "03110005.bin",
+    "lines": 13
+  },
+  {
+    "name": "LATP",
+    "stream": "03110191.bin",
+    "lines": 13
+  },
+  {
+    "name": "LATS",
+    "stream": "03110377.bin",
+    "lines": 23
+  },
+  {
+    "name": "creator73",
+    "stream": "03110600.bin",
+    "lines": 28
+  },
+  {
+    "name": "creator6_1",
+    "stream": "03110770.bin",
+    "lines": 60
+  },
+  {
+    "name": "LMT",
+    "stream": "03111037.bin",
+    "lines": 13
+  },
+  {
+    "name": "LOR",
+    "stream": "03111219.bin",
+    "lines": 13
+  },
+  {
+    "name": "INIT_VAR_NAMES",
+    "stream": "03111402.bin",
+    "lines": 5
+  },
+  {
+    "name": "load_tr",
+    "stream": "03111519.bin",
+    "lines": 47
+  },
+  {
+    "name": "LPR",
+    "stream": "03111925.bin",
+    "lines": 13
+  },
+  {
+    "name": "LTT",
+    "stream": "03112107.bin",
+    "lines": 13
+  },
+  {
+    "name": "LBL",
+    "stream": "03112289.bin",
+    "lines": 13
+  },
+  {
+    "name": "LCONT",
+    "stream": "03112472.bin",
+    "lines": 13
+  }
+]

@@ -1,0 +1,24 @@
+[package]
+name = "app-api"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+contracts.workspace = true
+axum.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+utoipa.workspace = true
+uuid.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+format-pud.workspace = true
+format-w2tr.workspace = true
+trigger-engine.workspace = true
+storage.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,10 @@
+[package]
+name = "format-w2tr"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+contracts.workspace = true
+
+[lints]
+workspace = true
